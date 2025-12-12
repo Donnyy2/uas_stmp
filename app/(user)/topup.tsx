@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -18,13 +19,18 @@ export default function Topup() {
 
     try {
       const response = await fetch(
-        "https://ubaya.cloud/react/nrp/topup.php",
+        "https://ubaya.cloud/react/[NRP]/topup.php", 
         options
       );
       const resjson = await response.json();
 
       if (resjson.result === "success") {
-        Alert.alert("Topup Berhasil", "Saldo berhasil ditambahkan.");
+        Alert.alert("Topup Berhasil", "Saldo berhasil ditambahkan.", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/user/home")
+          }
+        ]);
       } else {
         Alert.alert("Gagal", "Terjadi error.");
       }
