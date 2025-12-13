@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 include("dbconnect.php");
 extract($_POST);
 
-$sql = "SELECT * FROM users WHERE user_id=? AND user_password=?";
+$sql = "SELECT * FROM UAS_users WHERE user_id=? AND user_password=?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ss", $user_id, $user_password);
 $stmt->execute();

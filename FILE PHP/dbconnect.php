@@ -2,9 +2,9 @@
 header("Access-Control-Allow-Origin: *");
 
 $servername = "localhost";
-$username = "react_[NRP]";     
+$username = "react_160422136";     
 $password = "ubaya";
-$dbname = "react_[NRP]";       
+$dbname = "react_160422136";       
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 

@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 include("dbconnect.php");
 extract($_POST);
 
-$sql = "SELECT user_name, saldo FROM users WHERE user_name=?";
+$sql = "SELECT user_name, saldo FROM UAS_users WHERE user_name=?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_name);
 $stmt->execute();

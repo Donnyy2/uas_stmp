@@ -27,14 +27,14 @@ export default function Login() {
 
     try {
       const response = await fetch(
-        "https://ubaya.cloud/react/nrp/login.php", // GANTI NRP
+        "https://ubaya.cloud/react/160422136/UAS/login.php", // GANTI NRP
         options
       );
       const resjson = await response.json();
 
       if (resjson.result === "success") {
         await AsyncStorage.setItem("username", resjson.user_name);
-        router.replace("/user/home");
+        router.replace("/(user)/home" as any);
       } else {
         Alert.alert("Login gagal", "User ID atau password salah!");
       }
@@ -45,7 +45,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text>User ID</Text>
+      <Text style={styles.label}>User ID</Text>
       <TextInput style={styles.input} onChangeText={setUserid} />
 
       {isFieldInError("userid") &&
@@ -53,7 +53,7 @@ export default function Login() {
           <Text key={idx} style={styles.error}>{err}</Text>
         ))}
 
-      <Text>Password</Text>
+      <Text style={styles.label}>Password</Text>
       <TextInput
         style={styles.input}
         onChangeText={setPassword}
@@ -71,7 +71,7 @@ export default function Login() {
         <Text style={{ color: "gray" }}>Lengkapi data terlebih dahulu</Text>
       )}
 
-      <Link href="/auth/register">
+      <Link href="/(auth)/register">
         <Text style={{ marginTop: 20, color: "blue" }}>
           Belum punya akun? Register
         </Text>
@@ -81,12 +81,21 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
+  container: {
+    padding: 20,
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
   input: {
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
     borderColor: "#aaa",
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    color: '#000',
   },
-  error: { color: "red", fontSize: 12 },
+  error: { color: "red", fontSize: 12, marginBottom: 5 },
+  label: { marginBottom: 5, fontWeight: 'bold' }
 });

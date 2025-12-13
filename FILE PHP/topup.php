@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 include("dbconnect.php");
 extract($_POST);
 
-$sql = "UPDATE users SET saldo = saldo + ? WHERE user_name=?";
+$sql = "UPDATE UAS_users SET saldo = saldo + ? WHERE user_name=?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("is", $amount, $user_name);
 $stmt->execute();

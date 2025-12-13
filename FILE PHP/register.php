@@ -4,7 +4,7 @@ include("dbconnect.php");
 extract($_POST);
 
 // cek apakah user_id sudah ada
-$sql = "SELECT * FROM users WHERE user_id=?";
+$sql = "SELECT * FROM UAS_users WHERE user_id=?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_id);
 $stmt->execute();

@@ -34,14 +34,14 @@ export default function Register() {
 
     try {
       const response = await fetch(
-        "https://ubaya.cloud/react/nrp/register.php",
+        "https://ubaya.cloud/react/160422136/UAS/register.php",
         options
       );
       const resjson = await response.json();
 
       if (resjson.result === "success") {
         Alert.alert("Registrasi Berhasil", "Silakan login.");
-        router.replace("/auth/login");
+        router.replace("/(auth)/login" as any);
       } else {
         Alert.alert("Gagal", "User ID sudah digunakan.");
       }
@@ -52,17 +52,17 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text>User ID</Text>
+      <Text style={styles.label}>User ID</Text>
       <TextInput style={styles.input} onChangeText={setUserid} />
 
-      <Text>Password</Text>
+      <Text style={styles.label}>Password</Text>
       <TextInput
         style={styles.input}
         onChangeText={setPassword}
         secureTextEntry
       />
 
-      <Text>Nama Lengkap</Text>
+      <Text style={styles.label}>Nama Lengkap</Text>
       <TextInput style={styles.input} onChangeText={setNama} />
 
       {isFormValid ? (
@@ -75,11 +75,21 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
+  container: {
+    padding: 20,
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
   input: {
     borderWidth: 1,
     padding: 10,
     marginBottom: 10,
     borderColor: "#aaa",
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    color: '#000',
   },
+  error: { color: "red", fontSize: 12, marginBottom: 5 },
+  label: { marginBottom: 5, fontWeight: 'bold' }
 });
