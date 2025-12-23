@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,7 +19,6 @@ export default function BookingSeat() {
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(true);
-    const [processing, setProcessing] = useState(false);
 
     const rows = ["A", "B", "C", "D", "E", "F", "G", "H"];
     const cols = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -77,83 +75,23 @@ export default function BookingSeat() {
         Alert.alert(title, message, onOk ? [{ text: "OK", onPress: onOk }] : undefined);
     };
 
-    const handleBooking = async () => {
+    const handleNext = () => {
         if (selectedSeats.length === 0) {
             showAlert("Pilih Kursi", "Silakan pilih kursi terlebih dahulu.");
             return;
         }
 
-        setProcessing(true);
-        try {
-            const username = await AsyncStorage.getItem("username");
-            if (!username) {
-                showAlert("Error", "Sesi berakhir, silakan login ulang.");
-                router.replace("/(auth)/login" as any);
-                return;
+        router.push({
+            pathname: "/(user)/order_food" as any,
+            params: {
+                scheduleId,
+                title,
+                price,
+                studio,
+                time,
+                seats: selectedSeats.join(","),
             }
-
-            // seats format: A-1,B-2,C-3
-            const seatsParam = selectedSeats.join(",");
-            const bodyData =
-                "user_name=" + encodeURIComponent(username) +
-                "&schedule_id=" + encodeURIComponent(String(scheduleId)) +
-                "&seats=" + encodeURIComponent(seatsParam) +
-                "&price=" + encodeURIComponent(String(seatPrice));
-
-            const options = {
-                method: 'POST',
-                headers: new Headers({
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }),
-                body: bodyData
-            };
-
-            console.log("Sending booking:", bodyData);
-
-            const response = await fetch(
-                "https://ubaya.cloud/react/160422136/UAS/book_ticket.php",
-                options
-            );
-            const text = await response.text();
-            let json: any = null;
-            try {
-                json = JSON.parse(text);
-            } catch {
-                json = null;
-            }
-            console.log("Booking result:", json);
-
-            if (json?.result === "success") {
-                showAlert(
-                    "Berhasil!",
-                    "Tiket berhasil dipesan. Saldo Anda telah terpotong.",
-                    () => router.replace("/(user)/home" as any)
-                );
-                return;
-            }
-
-            const msg = (json?.message ?? "").toString();
-            const lower = msg.toLowerCase();
-            if (lower.includes("saldo") && (lower.includes("tidak cukup") || lower.includes("kurang"))) {
-                showAlert(
-                    "Saldo Tidak Cukup",
-                    "Saldo kamu tidak cukup untuk melanjutkan pembayaran. Silakan top up terlebih dahulu."
-                );
-                return;
-            }
-
-            if (!json) {
-                showAlert("Gagal", "Server mengembalikan respons tidak valid.");
-                return;
-            }
-
-            showAlert("Gagal", msg || "Gagal memesan tiket.");
-        } catch (error) {
-            console.error(error);
-            showAlert("Error", "Terjadi kesalahan koneksi.");
-        } finally {
-            setProcessing(false);
-        }
+        } as any);
     };
 
     const renderSeat = (row: string, col: number) => {
@@ -183,7 +121,7 @@ export default function BookingSeat() {
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.headerContainer}>
                 <Text style={styles.header}>{title}</Text>
-                <Text style={styles.subHeader}>{studio} • {time}</Text>
+                <Text style={styles.subHeader}>{studio ?? ""}{studio && time ? " • " : ""}{time ?? ""}</Text>
             </View>
 
             <View style={styles.screenContainer}>
@@ -221,22 +159,18 @@ export default function BookingSeat() {
 
             <View style={styles.footer}>
                 <View>
-                    <Text style={{ color: 'gray' }}>Total Harga:</Text>
+                    <Text style={{ color: 'gray' }}>Total Tiket:</Text>
                     <Text style={styles.priceText}>
                         Rp {totalPrice ? totalPrice.toLocaleString("id-ID") : "0"}
                     </Text>
                 </View>
 
                 <TouchableOpacity
-                    style={[styles.bookButton, (selectedSeats.length === 0 || processing) && { backgroundColor: "#ccc" }]}
-                    disabled={selectedSeats.length === 0 || processing}
-                    onPress={handleBooking}
+                    style={[styles.bookButton, selectedSeats.length === 0 && { backgroundColor: "#ccc" }]}
+                    disabled={selectedSeats.length === 0}
+                    onPress={handleNext}
                 >
-                    {processing ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.bookButtonText}>Bayar Sekarang</Text>
-                    )}
+                    <Text style={styles.bookButtonText}>Lanjut</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
-    Button,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
 } from "react-native";
 
 export default function MovieDetail() {
@@ -55,7 +55,9 @@ export default function MovieDetail() {
               params: { 
                 scheduleId, 
                 title, 
-                price 
+                price,
+                studio,
+                time
               }
             });
           }} 

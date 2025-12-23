@@ -18,6 +18,12 @@ export default function RootLayout() {
         <Stack.Screen name="(user)/movies" options={{ title: "Daftar Film" }} />
         <Stack.Screen name="(user)/movie_detail" options={{ title: "Detail Film" }} />
         <Stack.Screen name="(user)/booking_seat" options={{ title: "Pilih Kursi" }} />
+        <Stack.Screen name="(user)/cafe_locations" options={{ title: "Lokasi Café" }} />
+        <Stack.Screen name="(user)/order_food" options={{ title: "Pesan Makanan" }} />
+        <Stack.Screen name="(user)/order_summary" options={{ title: "Ringkasan" }} />
+        <Stack.Screen name="(user)/payment" options={{ title: "Pembayaran" }} />
+        <Stack.Screen name="(user)/order_detail" options={{ title: "Keterangan Pembelian" }} />
+        <Stack.Screen name="(user)/history" options={{ title: "History Pemesanan" }} />
         <Stack.Screen name="(user)/topup" options={{ title: "Top Up Saldo" }} />
       </Stack>
       <StatusBar style="auto" />

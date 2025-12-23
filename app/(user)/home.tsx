@@ -63,12 +63,24 @@ export default function Home() {
         />
       </View>
 
+      <View style={{ marginTop: 12 }}>
+        <Button
+          title="🍿 Pesan Makanan/Minuman"
+          color="#2c3e50"
+          onPress={() => router.push("/(user)/cafe_locations" as any)}
+        />
+      </View>
+
       <View style={{ marginTop: 20 }}>
         <Text style={styles.balance}>Saldo Anda: Rp {saldo}</Text>
       </View>
 
       <View style={{ marginTop: 20 }}>
         <Button title="Top Up Saldo" onPress={() => router.push("/(user)/topup" as any)} />
+      </View>
+
+      <View style={{ marginTop: 12 }}>
+        <Button title="History Pemesanan" onPress={() => router.push("/(user)/history" as any)} />
       </View>
 
       <View style={{ marginTop: 20 }}>
