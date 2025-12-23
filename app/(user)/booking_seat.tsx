@@ -17,7 +17,7 @@ export default function BookingSeat() {
     const { scheduleId, title, price, studio, time } = params;
 
     const [bookedSeats, setBookedSeats] = useState<string[]>([]);
-    const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -58,9 +58,28 @@ export default function BookingSeat() {
         fetchBookedSeats();
     }, []);
 
+    const toggleSeat = (seatId: string) => {
+        setSelectedSeats((prev) =>
+            prev.includes(seatId) ? prev.filter((s) => s !== seatId) : [...prev, seatId]
+        );
+    };
+
+    const seatPrice = Number(price) || 0;
+    const totalPrice = selectedSeats.length * seatPrice;
+
+    const showAlert = (title: string, message: string, onOk?: () => void) => {
+        if (Platform.OS === 'web') {
+            alert(`${title}\n\n${message}`);
+            onOk?.();
+            return;
+        }
+
+        Alert.alert(title, message, onOk ? [{ text: "OK", onPress: onOk }] : undefined);
+    };
+
     const handleBooking = async () => {
-        if (!selectedSeat) {
-            Alert.alert("Pilih Kursi", "Silakan pilih kursi terlebih dahulu.");
+        if (selectedSeats.length === 0) {
+            showAlert("Pilih Kursi", "Silakan pilih kursi terlebih dahulu.");
             return;
         }
 
@@ -68,19 +87,18 @@ export default function BookingSeat() {
         try {
             const username = await AsyncStorage.getItem("username");
             if (!username) {
-                Alert.alert("Error", "Sesi berakhir, silakan login ulang.");
+                showAlert("Error", "Sesi berakhir, silakan login ulang.");
                 router.replace("/(auth)/login" as any);
                 return;
             }
 
-            const [row, col] = selectedSeat.split("-");
-
+            // seats format: A-1,B-2,C-3
+            const seatsParam = selectedSeats.join(",");
             const bodyData =
-                "user_name=" + username +
-                "&schedule_id=" + scheduleId +
-                "&seat_row=" + row +
-                "&seat_col=" + col +
-                "&price=" + price;
+                "user_name=" + encodeURIComponent(username) +
+                "&schedule_id=" + encodeURIComponent(String(scheduleId)) +
+                "&seats=" + encodeURIComponent(seatsParam) +
+                "&price=" + encodeURIComponent(String(seatPrice));
 
             const options = {
                 method: 'POST',
@@ -96,27 +114,43 @@ export default function BookingSeat() {
                 "https://ubaya.cloud/react/160422136/UAS/book_ticket.php",
                 options
             );
-            const json = await response.json();
+            const text = await response.text();
+            let json: any = null;
+            try {
+                json = JSON.parse(text);
+            } catch {
+                json = null;
+            }
             console.log("Booking result:", json);
 
-            if (json.result === "success") {
-                if (Platform.OS === 'web') {
-                    alert("Berhasil! Tiket berhasil dipesan. Saldo Anda telah terpotong.");
-                    router.replace("/(user)/home" as any);
-                } else {
-                    Alert.alert("Berhasil!", "Tiket berhasil dipesan. Saldo Anda telah terpotong.", [
-                        {
-                            text: "OK",
-                            onPress: () => router.replace("/(user)/home" as any),
-                        },
-                    ]);
-                }
-            } else {
-                Alert.alert("Gagal", json.message || "Gagal memesan tiket.");
+            if (json?.result === "success") {
+                showAlert(
+                    "Berhasil!",
+                    "Tiket berhasil dipesan. Saldo Anda telah terpotong.",
+                    () => router.replace("/(user)/home" as any)
+                );
+                return;
             }
+
+            const msg = (json?.message ?? "").toString();
+            const lower = msg.toLowerCase();
+            if (lower.includes("saldo") && (lower.includes("tidak cukup") || lower.includes("kurang"))) {
+                showAlert(
+                    "Saldo Tidak Cukup",
+                    "Saldo kamu tidak cukup untuk melanjutkan pembayaran. Silakan top up terlebih dahulu."
+                );
+                return;
+            }
+
+            if (!json) {
+                showAlert("Gagal", "Server mengembalikan respons tidak valid.");
+                return;
+            }
+
+            showAlert("Gagal", msg || "Gagal memesan tiket.");
         } catch (error) {
             console.error(error);
-            Alert.alert("Error", "Terjadi kesalahan koneksi.");
+            showAlert("Error", "Terjadi kesalahan koneksi.");
         } finally {
             setProcessing(false);
         }
@@ -125,13 +159,13 @@ export default function BookingSeat() {
     const renderSeat = (row: string, col: number) => {
         const seatId = `${row}-${col}`;
         const isBooked = bookedSeats.includes(seatId);
-        const isSelected = selectedSeat === seatId;
+        const isSelected = selectedSeats.includes(seatId);
 
         return (
             <TouchableOpacity
                 key={seatId}
                 disabled={isBooked}
-                onPress={() => setSelectedSeat(isSelected ? null : seatId)}
+                onPress={() => toggleSeat(seatId)}
                 style={[
                     styles.seat,
                     isBooked ? styles.seatBooked : isSelected ? styles.seatSelected : styles.seatAvailable,
@@ -189,13 +223,13 @@ export default function BookingSeat() {
                 <View>
                     <Text style={{ color: 'gray' }}>Total Harga:</Text>
                     <Text style={styles.priceText}>
-                        Rp {selectedSeat ? Number(price).toLocaleString("id-ID") : "0"}
+                        Rp {totalPrice ? totalPrice.toLocaleString("id-ID") : "0"}
                     </Text>
                 </View>
 
                 <TouchableOpacity
-                    style={[styles.bookButton, (!selectedSeat || processing) && { backgroundColor: "#ccc" }]}
-                    disabled={!selectedSeat || processing}
+                    style={[styles.bookButton, (selectedSeats.length === 0 || processing) && { backgroundColor: "#ccc" }]}
+                    disabled={selectedSeats.length === 0 || processing}
                     onPress={handleBooking}
                 >
                     {processing ? (
