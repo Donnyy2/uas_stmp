@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { useValidation } from "react-simple-form-validator";
 
 export default function Login() {
@@ -16,7 +16,7 @@ export default function Login() {
     state: { userid, password },
   });
 
-  const doLogin = async () => {
+  const handleLogin = async () => {
     const options = {
       method: "POST",
       headers: new Headers({
@@ -25,21 +25,24 @@ export default function Login() {
       body: "user_id=" + userid + "&user_password=" + password,
     };
 
-    try {
-      const response = await fetch(
-        "https://ubaya.cloud/react/160422136/UAS/login.php", // GANTI NRP
-        options
-      );
-      const resjson = await response.json();
+    const response = await fetch(
+      "https://ubaya.cloud/react/160422136/UAS/login.php",
+      options
+    );
+    const json = await response.json();
 
-      if (resjson.result === "success") {
-        await AsyncStorage.setItem("username", resjson.user_name);
+    if (json.result == "success") {
+      try {
+        await AsyncStorage.setItem("username", json.user_name);
+        await AsyncStorage.setItem("userid", userid);
+        alert("Login successful");
         router.replace("/(user)/home" as any);
-      } else {
-        Alert.alert("Login gagal", "User ID atau password salah!");
+      } catch (e) {
+        console.error("Error saving data to AsyncStorage", e);
+        alert("Error saving data to AsyncStorage");
       }
-    } catch (e: any) {
-      Alert.alert("Error", e.message);
+    } else {
+      alert("Username or password is incorrect");
     }
   };
 
@@ -57,6 +60,7 @@ export default function Login() {
       <TextInput
         style={styles.input}
         onChangeText={setPassword}
+        value={password}
         secureTextEntry
       />
 
@@ -66,7 +70,9 @@ export default function Login() {
         ))}
 
       {isFormValid ? (
-        <Button title="Login" onPress={doLogin} />
+        <Button title="Login" onPress={() => {
+          handleLogin().catch((e) => alert("Error: " + e.message));
+        }} />
       ) : (
         <Text style={{ color: "gray" }}>Lengkapi data terlebih dahulu</Text>
       )}

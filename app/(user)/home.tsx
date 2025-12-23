@@ -46,7 +46,7 @@ export default function Home() {
 
   const logout = async () => {
     await AsyncStorage.clear();
-    router.replace("/auth/login" as any);
+    router.replace("/(auth)/login" as any);
   };
 
   return (

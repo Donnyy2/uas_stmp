@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { useValidation } from "react-simple-form-validator";
 
 export default function Register() {
@@ -17,7 +17,7 @@ export default function Register() {
     state: { userid, password, nama },
   });
 
-  const doRegister = async () => {
+  const handleRegister = async () => {
     const options = {
       method: "POST",
       headers: new Headers({
@@ -32,21 +32,17 @@ export default function Register() {
         nama,
     };
 
-    try {
-      const response = await fetch(
-        "https://ubaya.cloud/react/160422136/UAS/register.php",
-        options
-      );
-      const resjson = await response.json();
+    const response = await fetch(
+      "https://ubaya.cloud/react/160422136/UAS/register.php",
+      options
+    );
+    const json = await response.json();
 
-      if (resjson.result === "success") {
-        Alert.alert("Registrasi Berhasil", "Silakan login.");
-        router.replace("/(auth)/login" as any);
-      } else {
-        Alert.alert("Gagal", "User ID sudah digunakan.");
-      }
-    } catch (e: any) {
-      Alert.alert("Error", e.message);
+    if (json.result == "success") {
+      alert("Register successful");
+      router.replace("/(auth)/login" as any);
+    } else {
+      alert(json.message || "User ID sudah digunakan");
     }
   };
 
@@ -59,14 +55,17 @@ export default function Register() {
       <TextInput
         style={styles.input}
         onChangeText={setPassword}
+        value={password}
         secureTextEntry
       />
 
       <Text style={styles.label}>Nama Lengkap</Text>
-      <TextInput style={styles.input} onChangeText={setNama} />
+      <TextInput style={styles.input} onChangeText={setNama} value={nama} />
 
       {isFormValid ? (
-        <Button title="Registrasi" onPress={doRegister} />
+        <Button title="Registrasi" onPress={() => {
+          handleRegister().catch((e) => alert("Error: " + e.message));
+        }} />
       ) : (
         <Text style={{ color: "gray" }}>Lengkapi data terlebih dahulu</Text>
       )}
